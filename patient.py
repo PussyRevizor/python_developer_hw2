@@ -28,53 +28,57 @@ class Patient:
     def __init__(self, firstname, secondname, date_of_birth, phone, document_type, document_id):
 
 
-        if type(firstname) == int or type(firstname) == float:
+        if not isinstance(firstname, str):
             self.logger_error.error("Wrong Argument Type: firstname")
             raise TypeError
 
-        if firstname.isalpha() != True:
+        if not firstname.isalpha():
             self.logger_error.error("Wrong Argument: firstname")
             raise ValueError
 
-        if type(secondname) == int or type(secondname) == float:
+        if not isinstance(secondname, str):
             self.logger_error.error("Wrong Argument Type: lastname")
             raise TypeError
 
-        if secondname.isalpha() != True:
+        if not secondname.isalpha():
             self.logger_error.error("Wrong Argument: lastname")
             raise ValueError
 
 
-        if type(date_of_birth) == float:
+        if not isinstance(date_of_birth, int) and not isinstance(date_of_birth, str):
             self.logger_error.error("Wrong Argument Type: birth date")
             raise TypeError
 
-        if str(date_of_birth).isalpha() == True:
+        if str(date_of_birth).isalpha():
             self.logger_error.error("Wrong Argument: birth date")
             raise ValueError
 
-        if type(phone) == float:
+        if not isinstance(phone, int) and not isinstance(phone, str):
             self.logger_error.error("Wrong Argument Type: phone")
             raise TypeError
 
-        if str(phone).isalpha() == True:
+        if str(phone).isalpha():
             self.logger_error.error("Wrong Argument: phone")
             raise ValueError
 
-        if type(document_type) == float:
+        if not isinstance(document_type, str):
             self.logger_error.error("Wrong Argument Type: document type")
             raise TypeError
 
-        if type(document_id) == float:
+        if not isinstance(document_id, str) and not isinstance(document_id, int):
             self.logger_error.error("Wrong Argument Type: document id")
             raise TypeError
+
+        if str(document_id).isalpha():
+            self.logger_error.error("Wrong Argument: document_id")
+            raise ValueError
                 
         self.first_name = str(firstname).capitalize()
         self.last_name = str(secondname).capitalize()
 
         date = ""
         for i in str(date_of_birth):
-            if i == '0' or i == '1' or i == '2' or i == '3' or i == '4' or i == '5' or i == '6' or i == '7' or i == '8' or i == '9':
+            if i in "0123456789":
                 date += i
         if len(date) < 8:
             self.logger_error.error("Wrong Argument: date")
@@ -93,7 +97,6 @@ class Patient:
             i += 1
         self.phone = new_phone
 
-        #id = ''.join(str(document_id).split())
         new_id = ""
         for i in str(document_id):
             if i == '0' or i == '1' or i == '2' or i == '3' or i == '4' or i == '5' or i == '6' or i == '7' or i == '8' or i == '9':
@@ -153,7 +156,7 @@ class Patient:
                     raise ValueError
                 date = ""
                 for i in str(value):
-                    if i == '0' or i == '1' or i == '2' or i == '3' or i == '4' or i == '5' or i == '6' or i == '7' or i == '8' or i == '9':
+                    if i in "0123456789":
                         date += i
                 if len(date) < 8:
                     self.logger_error.error("Wrong Argument: date")
@@ -213,7 +216,7 @@ class Patient:
                 id = ''.join(str(value).split())
                 new_id = ""
                 for i in id:
-                    if i == '0' or i == '1' or i == '2' or i == '3' or i == '4' or i == '5' or i == '6' or i == '7' or i == '8' or i == '9':
+                    if i in "0123456789":
                         new_id += i
 
                 if len(new_id) != 10 and len(new_id) != 9:
@@ -229,14 +232,12 @@ class Patient:
 
     def save(self):
         df = pandas.DataFrame([[self.first_name, self.last_name, self.birth_date, self.phone, self.document_type, self.document_id]], columns = ["first_name", "last_name", "birth_date", "phone", "document_type", "document_id"])
-        #df = pandas.DataFrame([[self.first_name, self.last_name, self.birth_date, self.phone, self.document_type, self.document_id]])
         if not os.path.isfile(self.path):
-            df.to_csv(self.path, mode = 'w', index = False, header = None)
             self.logger.debug("File coronavirus.csv was created")
-        else:
-            df.to_csv(self.path, mode = 'a', index = False, header = None)
+        df.to_csv(self.path, mode = 'a', index = False, header = None)
         self.logger.debug("Patient %s %s was added to coronavirus.csv" % (self.first_name, self.last_name))
 
+       
 
     def __str__(self):
         return "firstname: %s, secondname: %s, date: %s, phone number: %s, document: %s, document number: %s" % (self.first_name, self.last_name, self.birth_date, self.phone, self.document_type, self.document_id)
@@ -264,6 +265,7 @@ class PatientCollection:
         df = pandas.read_csv(self.path_to_file, names = ["first_name", "last_name", "birth_date", "phone", "document_type", "document_id"])
         self.count = df["first_name"].count() - 1
         try:
+            #df = pandas.read_csv(self.path_to_file, names = ["first_name", "last_name", "birth_date", "phone", "document_type", "document_id"])
             if self.counter < self.count:
                 self.counter += 1
                 return Patient(str(df["first_name"][self.counter]), str(df["last_name"][self.counter]), str(df["birth_date"][self.counter]), str(df["phone"][self.counter]), str(df["document_type"][self.counter]), str(df["document_id"][self.counter]))
